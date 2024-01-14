@@ -1,0 +1,43 @@
+﻿@page "/administration-panel"
+
+<PageTitle>Admininistration Panel</PageTitle>
+
+<h3>Admininistration Panel</h3>
+
+Manage competitions
+
+@code {
+    private CompetitionDto[]? _competitions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //_competitions = await Http.GetFromJsonAsync<CompetitionDto[]>("sample-data/weather.json");
+    }
+
+    public sealed record CompetitionDto(
+    Guid Id,
+        DateTime StartAt,
+        DistanceDto Distance,
+        CompetitionPlaceDto Place,
+        int MaxCompetitors,
+        string Status,
+        IEnumerable<CheckpointDto> Checkpoints
+        ) { }
+
+    public sealed record DistanceDto(
+        decimal Amount,
+        string Unit
+        ) { }
+
+    public sealed record CompetitionPlaceDto(
+        string City,
+        decimal Latitude,
+        decimal Longitute
+        ) { }
+
+    public sealed record CheckpointDto(
+        Guid Id,
+        decimal TrackPointAmount,
+        string TrackPointUnit
+        ) { }
+}

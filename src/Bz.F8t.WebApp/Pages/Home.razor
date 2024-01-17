@@ -1,5 +1,8 @@
 ﻿@page "/"
+
 @using Bz.F8t.WebApp.ApiClients.Dtos
+@using Bz.F8t.WebApp.Components
+
 @inject ICompetitionApi competitionApi
 
 <PageTitle>Feet On The Tarmac</PageTitle>
@@ -18,21 +21,7 @@
         @foreach (var competition in competitions)
         {
             <div class="col">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">@competition.StartAt.ToString("yyyy-MM-dd") at @competition.StartAt.ToString("hh:mm") in @competition.Place.City</h5>
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">Distance: <strong>@competition.Distance.Amount @competition.Distance.Unit</strong></li>
-                        <li class="list-group-item">Max number of competitors: <strong>@competition.MaxCompetitors</strong></li>
-                        <li class="list-group-item">Status: <strong>@competition.Status</strong></li>
-                    </ul>
-                    <div class="card-body">
-                        @* <button type="button" class="btn btn-primary" disabled="@(competition.Status != statusOpenedForRegistration)">Register</button> *@
-                        <a href="#" class="btn btn-primary @(competition.Status !=statusOpenedForRegistration ? "disabled" : "")">Register</a>
-                        <a href="#" class="btn btn-secondary">Starting list</a>
-                    </div>
-                </div>
+               <CompetitionCard Competition=@competition/>
             </div>
         }
     }
@@ -45,16 +34,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // competitions = new List<CompetitionDto>
-        // {
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2023, 12, 06, 08, 30, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Kraków", 0, 0), 4750, "Closed", Array.Empty<CheckpointDto>()),
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 01, 08, 30, 00), new DistanceDto(10, "Kilometers"), new CompetitionPlaceDto("Kielce", 0, 0), 1500, "Opened", Array.Empty<CheckpointDto>()),
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 02, 11, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Warszawa", 0, 0), 8000, "Opened", Array.Empty<CheckpointDto>()),
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 09, 00, 00), new DistanceDto(42, "Kilometers"), new CompetitionPlaceDto("Poznań", 0, 0), 1500, "Opened", Array.Empty<CheckpointDto>()),
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 10, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Łódź", 0, 0), 1500, "Opened", Array.Empty<CheckpointDto>())
-        // };
+        competitions = new List<CompetitionDto>
+        {
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2023, 12, 06, 08, 30, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Kraków", 0, 0), 4750, "Closed", Array.Empty<CheckpointDto>()),
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 01, 08, 30, 00), new DistanceDto(10, "Kilometers"), new CompetitionPlaceDto("Kielce", 0, 0), 1500, "Opened", Array.Empty<CheckpointDto>()),
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 02, 11, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Warszawa", 0, 0), 8000, "Opened", Array.Empty<CheckpointDto>()),
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 09, 00, 00), new DistanceDto(42, "Kilometers"), new CompetitionPlaceDto("Poznań", 0, 0), 1500, "Opened", Array.Empty<CheckpointDto>()),
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 10, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Łódź", 0, 0), 1500, "Opened", Array.Empty<CheckpointDto>())
+        };
 
-        competitions = await competitionApi.GetAllCompetitionsAsync();
+        //competitions = await competitionApi.GetAllCompetitionsAsync();
 
         competitions = competitions.OrderByDescending(c => c.StartAt).ToList();
     }

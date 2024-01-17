@@ -12,7 +12,7 @@ builder.Services
     .AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
 builder.Services
-    .AddRefitClient<IWeatherApi>()
-    .ConfigureHttpClient(c => c.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+    .AddRefitClient<ICompetitionApi>()
+    .ConfigureHttpClient(c => c.BaseAddress = new Uri(builder.Configuration.GetValue<string>("Services:AdministrationUri")!));
 
 await builder.Build().RunAsync();

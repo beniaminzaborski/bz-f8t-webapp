@@ -1,17 +1,85 @@
 ﻿@page "/administration-panel"
 @using Bz.F8t.WebApp.ApiClients.Dtos
+@using Bz.F8t.WebApp.Components
+
+@inject NavigationManager navManager
+@inject ICompetitionApi competitionApi
 
 <PageTitle>Feet On The Tarmac - Admininistration Panel</PageTitle>
 
-<h3>Admininistration Panel</h3>
+<h3>Competitions</h3>
 
-Manage competitions
+<div class="btn-group" role="group" aria-label="Toolbar">
+    <button type="button" class="btn btn-primary" @onclick="CreateCompetition">Create competition</button>
+</div>
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Start At</th>
+            <th scope="col">Place</th>
+            <th scope="col">Distance</th>
+            <th scope="col">Max nb of competitors</th>
+            <th scope="col">Status</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var competition in competitions)
+        {
+            <tr>
+                <td>@competition.StartAt.ToString("yyyy-MM-dd hh:mm")</td>
+                <td>@competition.Place.City</td>
+                <td>@competition.Distance.Amount @competition.Distance.Unit</td>
+                <td>@competition.MaxCompetitors</td>
+                <td>@competition.Status</td>
+                <td>
+                    <div class="btn-group" role="group" aria-label="Actions">
+                        <button type="button" class="btn btn-primary btn-sm" @onclick="@(() => EditCompetition(competition.Id))"><span class="bi bi-pencil-square"></span></button>
+                        <button type="button" class="btn btn-success btn-sm" @onclick="@(() => OpenForRegistrationAsync(competition.Id))"><span class="bi bi-skip-start-circle"></span></button>
+                        <button type="button" class="btn btn-danger btn-sm" @onclick="@(() => CompleteRegistrationAsync(competition.Id))"><span class="bi bi-stop-circle"></span></button>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
-    private CompetitionDto[]? _competitions;
+    private IEnumerable<CompetitionDto> competitions = new List<CompetitionDto>();
 
     protected override async Task OnInitializedAsync()
     {
-        //_competitions = await Http.GetFromJsonAsync<CompetitionDto[]>("sample-data/weather.json");
+        // competitions = new List<CompetitionDto>
+        // {
+        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2023, 12, 06, 08, 30, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Kraków", 0, 0), 4750, "Closed", Array.Empty<CheckpointDto>()),
+        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 01, 08, 30, 00), new DistanceDto(10, "Kilometers"), new CompetitionPlaceDto("Kielce", 0, 0), 1500, "RegistrationCompleted", Array.Empty<CheckpointDto>()),
+        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 02, 11, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Warszawa", 0, 0), 8000, "OpenedForRegistration", Array.Empty<CheckpointDto>()),
+        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 09, 00, 00), new DistanceDto(42, "Kilometers"), new CompetitionPlaceDto("Poznań", 0, 0), 1500, "OpenedForRegistration", Array.Empty<CheckpointDto>()),
+        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 10, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Łódź", 0, 0), 1500, "Draft", Array.Empty<CheckpointDto>())
+        // };
+
+        competitions = await competitionApi.GetAllCompetitionsAsync();
+
+        competitions = competitions.OrderByDescending(c => c.StartAt).ToList();
+    }
+
+    private void CreateCompetition()
+    {
+        navManager.NavigateTo("administration-panel/competition");
+    }
+
+    private void EditCompetition(Guid competitionId)
+    {
+        navManager.NavigateTo($"administration-panel/competition/{competitionId}");
+    }
+
+    private async Task OpenForRegistrationAsync(Guid competitionId)
+    {
+        await competitionApi.OpenCompetitionRegistrationAsync(competitionId);
+    }
+
+    private async Task CompleteRegistrationAsync(Guid competitionId)
+    {
+        await competitionApi.CompleteCompetitionRegistrationAsync(competitionId);
     }
 }

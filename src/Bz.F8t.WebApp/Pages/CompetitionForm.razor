@@ -1,0 +1,115 @@
+﻿@page "/administration-panel/competition/{id:guid?}"
+
+@using Bz.F8t.WebApp.ApiClients.Dtos
+@using Bz.F8t.WebApp.Models
+
+@inject NavigationManager navManager
+@inject ICompetitionApi competitionApi;
+
+<h3>Competition</h3>
+
+<EditForm Model="Model" OnSubmit="Submit">
+    <div class="mb-3">
+        <label for="city" class="form-label">City</label>
+        <InputText @bind-Value="Model.City" class="form-control" id="city" disabled="@isUpdateMode" />
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="mb-3">
+                <label for="longitute" class="form-label">Longitute</label>
+                <InputNumber @bind-Value="Model.Longitute" class="form-control" id="longitute" disabled="@isUpdateMode" />
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3">
+                <label for="latitude" class="form-label">Latitude</label>
+                <InputNumber @bind-Value="Model.Latitude" class="form-control" id="latitude" disabled="@isUpdateMode" />
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="mb-3">
+                <label for="startDate" class="form-label">Start date</label>
+                <InputDate @bind-Value="Model.StartDate" class="form-control" id="startDate" disabled="@isUpdateMode" />
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3">
+                <label for="startTime" class="form-label">Start time</label>
+                <input type="time" class="form-control" @bind-value="Model.StartTime" @bind-value:event="oninput" id="startTime" disabled="@isUpdateMode" />
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="mb-3">
+                <label for="distance" class="form-label">Distance</label>
+                <InputNumber @bind-Value="Model.Distance" class="form-control" id="distance" disabled="@isUpdateMode" />
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3">
+                <label for="distanceUnit" class="form-label">Distance unit</label>
+                <InputSelect @bind-Value="Model!.DistanceUnit" class="form-select" id="distanceUnit" disabled="@isUpdateMode">
+                    <option value="">
+                        Select unit ...
+                    </option>
+                    <option checked="@(Model!.DistanceUnit == "Kilometers")"
+                            value="Kilometers">
+                        Kilometers
+                    </option>
+                    <option checked="@(Model!.DistanceUnit == "Meters")"
+                            value="Meters">
+                        Meters
+                    </option>
+                </InputSelect>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="maxNumberOfCompetitors" class="form-label">Maximum number of competitors</label>
+        <InputNumber @bind-Value="Model.MaxNumberOfCompetitors" class="form-control" id="maxNumberOfCompetitors" />
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
+@code {
+    private CompetitionModel Model { get; set; } = new();
+    private bool isUpdateMode = false;
+
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            isUpdateMode = true;
+            var competitionDto = await competitionApi.GetCompetitionAsync(Id!.Value);
+            Model = CompetitionModel.FromCompetitionDto(competitionDto);
+        }
+        else
+        {
+            Model = new();
+        }
+    }
+
+    private async Task Submit()
+    {
+        if (!isUpdateMode)
+        {
+            await competitionApi.CreateCompetitionAsync(Model.ToCreateCompetitionDto());
+        }
+        else
+        {
+            await competitionApi.ChangeMaxCompetitorsAsync(Id!.Value, new ChangeMaxCompetitorsRequestDto(Model.MaxNumberOfCompetitors));
+        }
+
+        navManager.NavigateTo("administration-panel");
+    }
+}

@@ -10,7 +10,7 @@ public interface ICompetitionApi
     Task<IEnumerable<CompetitionDto>> GetAllCompetitionsAsync();
 
     [Get("/api/competition/{id}")]
-    Task<IEnumerable<CompetitionDto>> GetCompetitionAsync(Guid id);
+    Task<CompetitionDto> GetCompetitionAsync(Guid id);
 
     [Post("/api/competition/{id}/registration/open")]
     Task OpenCompetitionRegistrationAsync(Guid id);
@@ -18,6 +18,9 @@ public interface ICompetitionApi
     [Post("/api/competition/{id}/registration/complete")]
     Task CompleteCompetitionRegistrationAsync(Guid id);
 
-    //[Post("api/competition")]
-    //Task CreateCompetitionAsync(CreateCompetitionDto dto);
+    [Post("/api/competition")]
+    Task CreateCompetitionAsync(CreateCompetitionDto dto);
+
+    [Patch("/api/competition/{id}")]
+    Task ChangeMaxCompetitorsAsync(Guid id, ChangeMaxCompetitorsRequestDto dto);
 }

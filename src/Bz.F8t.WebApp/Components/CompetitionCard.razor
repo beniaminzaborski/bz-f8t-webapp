@@ -1,8 +1,10 @@
 ﻿@using Bz.F8t.WebApp.ApiClients.Dtos
 
 <div class="card h-100">
-    <div class="card-body">
-        <h5 class="card-title">@Competition.StartAt.ToString("yyyy-MM-dd") at @Competition.StartAt.ToString("hh:mm") in @Competition.Place.City</h5>
+    <div class="card-header">
+        @* <h5 class="card-title"> *@
+        <strong>@Competition.StartAt.ToString("yyyy-MM-dd")</strong> at <strong>@Competition.StartAt.ToString("hh:mm")</strong> in <strong>@Competition.Place.City</strong>
+        @* </h5> *@
     </div>
     <ul class="list-group list-group-flush">
         <li class="list-group-item">Distance: <strong>@Competition.Distance.Amount @Competition.Distance.Unit</strong></li>
@@ -17,7 +19,7 @@
 </div>
 
 @code {
-    private const string statusOpenedForRegistration = "Opened";
+    private const string statusOpenedForRegistration = "OpenedForRegistration";
 
     [EditorRequired]
     [Parameter]

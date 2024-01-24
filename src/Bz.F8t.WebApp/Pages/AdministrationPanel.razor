@@ -10,10 +10,14 @@
 <h3>Competitions</h3>
 
 <div class="btn-group" role="group" aria-label="Toolbar">
-    <button type="button" class="btn btn-primary" @onclick="CreateCompetition">Create competition</button>
+    <button type="button" class="btn btn-primary" @onclick="CreateCompetition">
+        <i class="bi bi-plus-circle align-middle"></i>
+        <span class="align-middle">Create competition</span>
+    </button>
 </div>
-<table class="table table-striped table-hover">
-    <thead>
+<table class="table table-striped table-hover caption-top">
+    <caption>List of competitions</caption>
+    <thead class="table-dark">
         <tr>
             <th scope="col">Start At</th>
             <th scope="col">Place</th>
@@ -49,16 +53,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // competitions = new List<CompetitionDto>
-        // {
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2023, 12, 06, 08, 30, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Kraków", 0, 0), 4750, "Closed", Array.Empty<CheckpointDto>()),
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 01, 08, 30, 00), new DistanceDto(10, "Kilometers"), new CompetitionPlaceDto("Kielce", 0, 0), 1500, "RegistrationCompleted", Array.Empty<CheckpointDto>()),
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 02, 11, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Warszawa", 0, 0), 8000, "OpenedForRegistration", Array.Empty<CheckpointDto>()),
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 09, 00, 00), new DistanceDto(42, "Kilometers"), new CompetitionPlaceDto("Poznań", 0, 0), 1500, "OpenedForRegistration", Array.Empty<CheckpointDto>()),
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 10, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Łódź", 0, 0), 1500, "Draft", Array.Empty<CheckpointDto>())
-        // };
+        competitions = new List<CompetitionDto>
+        {
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2023, 12, 06, 08, 30, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Kraków", 0, 0), 4750, "Closed", Array.Empty<CheckpointDto>()),
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 01, 08, 30, 00), new DistanceDto(10, "Kilometers"), new CompetitionPlaceDto("Kielce", 0, 0), 1500, "RegistrationCompleted", Array.Empty<CheckpointDto>()),
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 02, 11, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Warszawa", 0, 0), 8000, "OpenedForRegistration", Array.Empty<CheckpointDto>()),
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 09, 00, 00), new DistanceDto(42, "Kilometers"), new CompetitionPlaceDto("Poznań", 0, 0), 1500, "OpenedForRegistration", Array.Empty<CheckpointDto>()),
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 10, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Łódź", 0, 0), 1500, "Draft", Array.Empty<CheckpointDto>())
+        };
 
-        competitions = await competitionApi.GetAllCompetitionsAsync();
+        //competitions = await competitionApi.GetAllCompetitionsAsync();
 
         competitions = competitions.OrderByDescending(c => c.StartAt).ToList();
     }

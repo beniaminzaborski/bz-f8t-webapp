@@ -8,7 +8,9 @@
 
 <h3>Competition</h3>
 
-<EditForm Model="Model" OnSubmit="Submit">
+<EditForm Model="Model" OnValidSubmit="Submit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
     <div class="mb-3">
         <label for="city" class="form-label">City</label>
         <InputText @bind-Value="Model.City" class="form-control" id="city" disabled="@isUpdateMode" />
@@ -75,7 +77,10 @@
         <InputNumber @bind-Value="Model.MaxNumberOfCompetitors" class="form-control" id="maxNumberOfCompetitors" />
     </div>
     
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-floppy align-middle"></i>
+        <span class="align-middle">Submit</span>
+    </button>
 </EditForm>
 
 @code {

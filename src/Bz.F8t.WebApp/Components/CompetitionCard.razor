@@ -13,8 +13,14 @@
     </ul>
     <div class="card-body">
         @* <button type="button" class="btn btn-primary" disabled="@(competition.Status != statusOpenedForRegistration)">Register</button> *@
-        <a href="#" class="btn btn-primary @(Competition.Status !=statusOpenedForRegistration ? "disabled" : "")">Register</a>
-        <a href="#" class="btn btn-secondary">Starting list</a>
+        <a href="#" class="btn btn-primary @(Competition.Status !=statusOpenedForRegistration ? "disabled" : "")">
+            <i class="bi bi-ui-checks align-middle"></i>
+            <span class="align-middle">Register</span>
+        </a>
+        <a href="#" class="btn btn-secondary">
+            <i class="bi bi-people-fill align-middle"></i>
+            <span>Starting list</span>
+        </a>
     </div>
 </div>
 

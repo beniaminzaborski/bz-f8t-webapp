@@ -1,6 +1,7 @@
 ﻿@page "/administration-panel"
 @using Bz.F8t.WebApp.ApiClients.Dtos
 @using Bz.F8t.WebApp.Components
+@using Refit
 
 @inject NavigationManager navManager
 @inject ICompetitionApi competitionApi
@@ -8,6 +9,11 @@
 <PageTitle>Feet On The Tarmac - Admininistration Panel</PageTitle>
 
 <h3>Competitions</h3>
+
+<div class="alert alert-danger alert-dismissible fade @(showAlert ? "show" : "")" role="alert">
+    @alertMessage
+    <button type="button" class="btn-close" @onclick="CloseAlert" aria-label="Close"></button>
+</div>
 
 <div class="btn-group" role="group" aria-label="Toolbar">
     <button type="button" class="btn btn-primary" @onclick="CreateCompetition">
@@ -39,9 +45,9 @@
                     <td>@competition.Status</td>
                     <td>
                         <div class="btn-group" role="group" aria-label="Actions">
-                            <button type="button" class="btn btn-primary" @onclick="@(() => EditCompetition(competition.Id))"><span class="bi bi-pencil-square"></span></button>
-                            <button type="button" class="btn btn-success" @onclick="@(() => OpenForRegistrationAsync(competition.Id))"><span class="bi bi-skip-start-circle"></span></button>
-                            <button type="button" class="btn btn-danger" @onclick="@(() => CompleteRegistrationAsync(competition.Id))"><span class="bi bi-stop-circle"></span></button>
+                            <button type="button" class="btn btn-primary @(IsActionActive("Edit", competition.Status) ? "" : "disabled")" @onclick="@(() => EditCompetition(competition.Id))"><span class="bi bi-pencil-square"></span></button>
+                            <button type="button" class="btn btn-success @(IsActionActive("OpenForRegistration", competition.Status) ? "" : "disabled")" @onclick="@(() => OpenForRegistrationAsync(competition.Id))"><span class="bi bi-skip-start-circle"></span></button>
+                            <button type="button" class="btn btn-danger @(IsActionActive("CompleteRegistration", competition.Status) ? "" : "disabled")" @onclick="@(() => CompleteRegistrationAsync(competition.Id))"><span class="bi bi-stop-circle"></span></button>
                         </div>
                     </td>
                 </tr>
@@ -52,6 +58,8 @@
 
 @code {
     private IEnumerable<CompetitionDto> competitions = new List<CompetitionDto>();
+    private string alertMessage = string.Empty;
+    private bool showAlert = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,9 +72,28 @@
             new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 10, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Łódź", 0, 0), 1500, "Draft", Array.Empty<CheckpointDto>())
         };
 
-        //competitions = await competitionApi.GetAllCompetitionsAsync();
+        //await FetchDataAsync();
+    }
 
-        competitions = competitions.OrderByDescending(c => c.StartAt).ToList();
+    private async Task FetchDataAsync()
+    {
+        try
+        {
+            var response = await competitionApi.GetAllCompetitionsAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                competitions = response.Content;
+                competitions = competitions.OrderByDescending(c => c.StartAt).ToList();
+            }
+            else
+            {
+                ShowAlert(response.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
     }
 
     private void CreateCompetition()
@@ -81,11 +108,49 @@
 
     private async Task OpenForRegistrationAsync(Guid competitionId)
     {
-        await competitionApi.OpenCompetitionRegistrationAsync(competitionId);
+        try
+        {
+            var response = await competitionApi.OpenCompetitionRegistrationAsync(competitionId);
+            if (!response.IsSuccessStatusCode)
+            {
+                ShowAlert(response.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
     }
 
     private async Task CompleteRegistrationAsync(Guid competitionId)
     {
-        await competitionApi.CompleteCompetitionRegistrationAsync(competitionId);
+        try
+        {
+            var response = await competitionApi.CompleteCompetitionRegistrationAsync(competitionId);
+            if (!response.IsSuccessStatusCode)
+            {
+                ShowAlert(response.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+    }
+
+    private bool IsActionActive(string actionName, string status) =>
+        actionName switch
+        {
+            "Edit" => status != "Closed" && status != "RegistrationCompleted",
+            "OpenForRegistration" => status == "Draft",
+            "CompleteRegistration" => status == "OpenedForRegistration"
+        };
+
+    private void CloseAlert() => showAlert = false;
+
+    private void ShowAlert(string message)
+    {
+        alertMessage = message;
+        showAlert = true;
     }
 }

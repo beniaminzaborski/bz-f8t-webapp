@@ -7,20 +7,20 @@ namespace Bz.F8t.WebApp.ApiClients;
 public interface ICompetitionApi
 {
     [Get("/api/competition")]
-    Task<IEnumerable<CompetitionDto>> GetAllCompetitionsAsync();
+    Task<ApiResponse<IEnumerable<CompetitionDto>>> GetAllCompetitionsAsync();
 
     [Get("/api/competition/{id}")]
-    Task<CompetitionDto> GetCompetitionAsync(Guid id);
+    Task<ApiResponse<CompetitionDto>> GetCompetitionAsync(Guid id);
 
     [Post("/api/competition/{id}/registration/open")]
-    Task OpenCompetitionRegistrationAsync(Guid id);
+    Task<IApiResponse> OpenCompetitionRegistrationAsync(Guid id);
 
     [Post("/api/competition/{id}/registration/complete")]
-    Task CompleteCompetitionRegistrationAsync(Guid id);
+    Task<IApiResponse> CompleteCompetitionRegistrationAsync(Guid id);
 
     [Post("/api/competition")]
-    Task CreateCompetitionAsync(CreateCompetitionDto dto);
+    Task<IApiResponse> CreateCompetitionAsync(CreateCompetitionDto dto);
 
     [Patch("/api/competition/{id}")]
-    Task ChangeMaxCompetitorsAsync(Guid id, ChangeMaxCompetitorsRequestDto dto);
+    Task<IApiResponse> ChangeMaxCompetitorsAsync(Guid id, ChangeMaxCompetitorsRequestDto dto);
 }

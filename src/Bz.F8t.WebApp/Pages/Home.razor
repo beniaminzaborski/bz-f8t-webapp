@@ -11,6 +11,11 @@
 
 <p>Find your competition and join as competitior. It's easy! Just fill the registration form.</p>
 
+<div class="alert alert-danger alert-dismissible fade @(showAlert ? "show" : "")" role="alert">
+    @alertMessage
+    <button type="button" class="btn-close" @onclick="CloseAlert" aria-label="Close"></button>
+</div>
+
 <div class="row row-cols-1 row-cols-md-3 g-4">
     @if (competitions == null)
     {
@@ -32,19 +37,49 @@
 
     private IEnumerable<CompetitionDto>? competitions = null;
 
+    private string alertMessage = string.Empty;
+    private bool showAlert = false;
+
     protected override async Task OnInitializedAsync()
     {
-        competitions = new List<CompetitionDto>
+        // competitions = new List<CompetitionDto>
+        // {
+        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2023, 12, 06, 08, 30, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Kraków", 0, 0), 4750, "Closed", Array.Empty<CheckpointDto>()),
+        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 01, 08, 30, 00), new DistanceDto(10, "Kilometers"), new CompetitionPlaceDto("Kielce", 0, 0), 1500, "RegistrationCompleted", Array.Empty<CheckpointDto>()),
+        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 02, 11, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Warszawa", 0, 0), 8000, "OpenedForRegistration", Array.Empty<CheckpointDto>()),
+        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 09, 00, 00), new DistanceDto(42, "Kilometers"), new CompetitionPlaceDto("Poznań", 0, 0), 1500, "OpenedForRegistration", Array.Empty<CheckpointDto>()),
+        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 10, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Łódź", 0, 0), 1500, "Draft", Array.Empty<CheckpointDto>())
+        // };
+
+        await FetchDataAsync();
+    }
+
+    private async Task FetchDataAsync()
+    {
+        try
         {
-            new CompetitionDto(Guid.NewGuid(), new DateTime(2023, 12, 06, 08, 30, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Kraków", 0, 0), 4750, "Closed", Array.Empty<CheckpointDto>()),
-            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 01, 08, 30, 00), new DistanceDto(10, "Kilometers"), new CompetitionPlaceDto("Kielce", 0, 0), 1500, "RegistrationCompleted", Array.Empty<CheckpointDto>()),
-            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 02, 11, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Warszawa", 0, 0), 8000, "OpenedForRegistration", Array.Empty<CheckpointDto>()),
-            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 09, 00, 00), new DistanceDto(42, "Kilometers"), new CompetitionPlaceDto("Poznań", 0, 0), 1500, "OpenedForRegistration", Array.Empty<CheckpointDto>()),
-            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 10, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Łódź", 0, 0), 1500, "Draft", Array.Empty<CheckpointDto>())
-        };
+            var response = await competitionApi.GetAllCompetitionsAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                competitions = response.Content;
+                competitions = competitions.OrderByDescending(c => c.StartAt).ToList();
+            }
+            else
+            {
+                ShowAlert(response.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+    }
 
-        //competitions = await competitionApi.GetAllCompetitionsAsync();
+    private void CloseAlert() => showAlert = false;
 
-        competitions = competitions.Where(c => c.Status != "Draft").OrderByDescending(c => c.StartAt).ToList();
+    private void ShowAlert(string message)
+    {
+        alertMessage = message;
+        showAlert = true;
     }
 }

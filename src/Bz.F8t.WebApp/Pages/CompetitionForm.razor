@@ -8,6 +8,11 @@
 
 <h3>Competition</h3>
 
+<div class="alert alert-danger alert-dismissible fade @(showAlert ? "show" : "")" role="alert">
+    @alertMessage
+    <button type="button" class="btn-close" @onclick="CloseAlert" aria-label="Close"></button>
+</div>
+
 <EditForm Model="Model" OnValidSubmit="Submit">
     <DataAnnotationsValidator />
     <ValidationSummary />
@@ -76,7 +81,7 @@
         <label for="maxNumberOfCompetitors" class="form-label">Maximum number of competitors</label>
         <InputNumber @bind-Value="Model.MaxNumberOfCompetitors" class="form-control" id="maxNumberOfCompetitors" />
     </div>
-    
+
     <button type="submit" class="btn btn-primary">
         <i class="bi bi-save align-middle"></i>
         <span class="align-middle">Submit</span>
@@ -91,6 +96,8 @@
 @code {
     private CompetitionModel Model { get; set; } = new();
     private bool isUpdateMode = false;
+    private string alertMessage = string.Empty;
+    private bool showAlert = false;
 
     [Parameter]
     public Guid? Id { get; set; }
@@ -100,8 +107,7 @@
         if (Id.HasValue)
         {
             isUpdateMode = true;
-            var competitionDto = await competitionApi.GetCompetitionAsync(Id!.Value);
-            Model = CompetitionModel.FromCompetitionDto(competitionDto);
+            await FetchDataAsync();
         }
         else
         {
@@ -109,17 +115,83 @@
         }
     }
 
+    private async Task FetchDataAsync()
+    {
+        try
+        {
+            var response = await competitionApi.GetCompetitionAsync(Id!.Value);
+            if (response.IsSuccessStatusCode)
+            {
+                var competitionDto = response.Content;
+                Model = CompetitionModel.FromCompetitionDto(competitionDto);
+            }
+            else
+            {
+                ShowAlert(response.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+    }
+
     private async Task Submit()
     {
         if (!isUpdateMode)
         {
-            await competitionApi.CreateCompetitionAsync(Model.ToCreateCompetitionDto());
+            await CreateCompetitionAsync();
         }
         else
         {
-            await competitionApi.ChangeMaxCompetitorsAsync(Id!.Value, new ChangeMaxCompetitorsRequestDto(Model.MaxNumberOfCompetitors));
+            await ChangeMaxCompetitorsAsync();
         }
 
-        navManager.NavigateTo("administration-panel");
+        if (!showAlert)
+        {
+            navManager.NavigateTo("administration-panel");
+        }
+    }
+
+    private async Task CreateCompetitionAsync()
+    {
+        try
+        {
+            var response = await competitionApi.CreateCompetitionAsync(Model.ToCreateCompetitionDto());
+            if (!response.IsSuccessStatusCode)
+            {
+                ShowAlert(response.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+
+    }
+
+    private async Task ChangeMaxCompetitorsAsync()
+    {
+        try
+        {
+            var response = await competitionApi.ChangeMaxCompetitorsAsync(Id!.Value, new ChangeMaxCompetitorsRequestDto(Model.MaxNumberOfCompetitors));
+            if (!response.IsSuccessStatusCode)
+            {
+                ShowAlert(response.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+
+    }
+
+    private void CloseAlert() => showAlert = false;
+
+    private void ShowAlert(string message)
+    {
+        alertMessage = message;
+        showAlert = true;
     }
 }

@@ -1,14 +1,98 @@
 ﻿@page "/starting-list/{id:guid}"
+@using Bz.F8t.WebApp.ApiClients.Dtos
+
+@inject NavigationManager navManager
+@inject IRegistrationApi registrationApi;
 
 <PageTitle>Statring List</PageTitle>
 
-<h3>Statring List</h3>
+<h3>Statring list of @Id</h3>
 
-The list of registered competitors
+<div class="alert alert-danger alert-dismissible fade @(showAlert ? "show" : "")" role="alert">
+    @alertMessage
+    <button type="button" class="btn-close" @onclick="CloseAlert" aria-label="Close"></button>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover caption-top align-middle">
+        <caption>List of competitors</caption>
+        <thead class="table-dark">
+            <tr>
+                <th scope="col">Number</th>
+                <th scope="col">Firstname</th>
+                <th scope="col">Lastname</th>
+                <th scope="col">Date of birth</th>
+                <th scope="col">City</th>
+                <th scope="col">Time (neto)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var competitor in competitors)
+            {
+                <tr>
+                    <td>@competitor.Number</td>
+                    <td>@competitor.FirstName</td>
+                    <td>@competitor.LastName</td>
+                    <td>@competitor.BirthDate</td>
+                    <td>@competitor.City</td>
+                    <td>@competitor.NetTime</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<a href="/" class="btn btn-danger">
+    <i class="bi bi-arrow-return-left align-middle"></i>
+    <span class="align-middle">Back to list</span>
+</a>
 
 @code {
     [EditorRequired]
     [Parameter]
     public Guid Id { get; set; }
 
+    private IEnumerable<CompetitorDto> competitors = new List<CompetitorDto>();
+    private string alertMessage = string.Empty;
+    private bool showAlert = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        competitors = new List<CompetitorDto>
+        {
+            new CompetitorDto(Guid.NewGuid(), Id, "1", "Jan", "Kowalski", new DateTime(1980, 01, 23), "Kielce", null),
+            new CompetitorDto(Guid.NewGuid(), Id, "2", "Janusz", "Januszewski", new DateTime(1967, 03, 03), "Kielce", null),
+            new CompetitorDto(Guid.NewGuid(), Id, "3", "Kuliusz", "Grab", new DateTime(1977, 09, 20), "Kielce", null)
+    };
+
+        //await FetchDataAsync();
+    }
+
+    private async Task FetchDataAsync()
+    {
+        try
+        {
+            var response = await registrationApi.GetCompetitorsAsync(Id);
+            if (response.IsSuccessStatusCode)
+            {
+                competitors = response.Content;
+            }
+            else
+            {
+                ShowAlert(response.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+    }
+
+    private void CloseAlert() => showAlert = false;
+
+    private void ShowAlert(string message)
+    {
+        alertMessage = message;
+        showAlert = true;
+    }
 }

@@ -1,0 +1,14 @@
+﻿@page "/registration-summary/{id:guid}"
+
+<h3>Registration Summary</h3>
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public Guid Id { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+}

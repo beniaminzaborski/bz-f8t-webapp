@@ -1,0 +1,14 @@
+﻿@page "/starting-list/{id:guid}"
+
+<PageTitle>Statring List</PageTitle>
+
+<h3>Statring List</h3>
+
+The list of registered competitors
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public Guid Id { get; set; }
+
+}

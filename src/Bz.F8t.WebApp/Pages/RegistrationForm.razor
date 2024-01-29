@@ -1,0 +1,124 @@
+﻿@page "/registration/{id:guid}"
+@using Bz.F8t.WebApp.Models
+
+@inject NavigationManager navManager
+@inject IRegistrationApi registrationApi;
+
+<PageTitle>Registration</PageTitle>
+
+<h3>Registration for @Id</h3>
+
+<div class="alert alert-danger alert-dismissible fade @(showAlert ? "show" : "")" role="alert">
+    @alertMessage
+    <button type="button" class="btn-close" @onclick="CloseAlert" aria-label="Close"></button>
+</div>
+
+<EditForm Model="Model" OnValidSubmit="Submit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="row">
+        <div class="col">
+            <div class="mb-3">
+                <label for="firstName" class="form-label">First name</label>
+                <InputText @bind-Value="Model.FirstName" class="form-control" id="firstName" />
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3">
+                <label for="lastName" class="form-label">Last name</label>
+                <InputText @bind-Value="Model.LastName" class="form-control" id="lastName" />
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="mb-3">
+                <label for="birthDate" class="form-label">Birth date</label>
+                <InputDate @bind-Value="Model.BirthDate" class="form-control" id="birthDate" />
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3">
+                <label for="city" class="form-label">City</label>
+                <InputText @bind-Value="Model.City" class="form-control" id="city" />
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="mb-3">
+                <label for="phoneNumber" class="form-label">Phone number</label>
+                <InputText @bind-Value="Model.PhoneNumber" class="form-control" id="phoneNumber" />
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3">
+                <label for="contactPersonNumber" class="form-label">Contact person number</label>
+                <InputText @bind-Value="Model.ContactPersonNumber" class="form-control" id="contactPersonNumber" />
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-save align-middle"></i>
+        <span class="align-middle">Register</span>
+    </button>
+
+    <a href="/" class="btn btn-danger">
+        <i class="bi bi-arrow-return-left align-middle"></i>
+        <span class="align-middle">Back to list</span>
+    </a>
+</EditForm>
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private CompetitorRegistrationModel Model { get; set; } = new();
+
+    private string alertMessage = string.Empty;
+    private bool showAlert = false;
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    private async Task Submit()
+    {
+        await RegisterAsync();
+
+        if (!showAlert)
+        {
+            navManager.NavigateTo($"registration-summary/{Id}");
+        }
+    }
+
+    private async Task RegisterAsync()
+    {
+        try
+        {
+            var response = await registrationApi.RegisterAsync(Model.ToRegistrationRequestDto(Id));
+            if (!response.IsSuccessStatusCode)
+            {
+                ShowAlert(response.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+    }
+
+    private void CloseAlert() => showAlert = false;
+
+    private void ShowAlert(string message)
+    {
+        alertMessage = message;
+        showAlert = true;
+    }
+}

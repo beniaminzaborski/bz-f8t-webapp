@@ -14,5 +14,8 @@ builder.Services
 builder.Services
     .AddRefitClient<ICompetitionApi>()
     .ConfigureHttpClient(c => c.BaseAddress = new Uri(builder.Configuration.GetValue<string>("Services:AdministrationUri")!));
+builder.Services
+    .AddRefitClient<IRegistrationApi>()
+    .ConfigureHttpClient(c => c.BaseAddress = new Uri(builder.Configuration.GetValue<string>("Services:RegistrationUri")!));
 
 await builder.Build().RunAsync();

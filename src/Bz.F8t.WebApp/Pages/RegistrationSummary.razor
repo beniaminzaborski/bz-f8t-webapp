@@ -1,14 +1,69 @@
 ﻿@page "/registration-summary/{id:guid}"
+@using Bz.F8t.WebApp.Notifications
+@using Microsoft.AspNetCore.SignalR.Client
+
+@implements IAsyncDisposable
+
+@inject ISignalRApi signalRApi
 
 <h3>Registration Summary</h3>
+
+<div class="alert alert-danger alert-dismissible fade @(showAlert ? "show" : "")" role="alert">
+    @alertMessage
+    <button type="button" class="btn-close" @onclick="CloseAlert" aria-label="Close"></button>
+</div>
 
 @code {
     [EditorRequired]
     [Parameter]
     public Guid Id { get; set; }
 
-    protected override Task OnInitializedAsync()
+    private HubConnection? _notificationHubConnection;
+
+    private string alertMessage = string.Empty;
+    private bool showAlert = false;
+
+    protected override async Task OnInitializedAsync()
     {
-        return base.OnInitializedAsync();
+        await StartHubConnectionAsync();
+        SubscribeToNotifications();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _notificationHubConnection?.DisposeAsync();
+    }
+
+    private async Task StartHubConnectionAsync()
+    {
+        var signalRConnectionInfo = await signalRApi.SignalRNegotiateAsync();
+
+        var signalrUrl = ($"https://sigr-fott-qa-westeu.service.signalr.net");
+        _notificationHubConnection = new HubConnectionBuilder()
+            .WithUrl(signalRConnectionInfo.Url, options =>
+            {
+                options.AccessTokenProvider = () => Task.FromResult(signalRConnectionInfo.AccessToken);
+            })
+            .WithAutomaticReconnect()
+            .Build();
+
+        await _notificationHubConnection.StartAsync();
+    }
+
+    private void SubscribeToNotifications()
+    {
+        _notificationHubConnection?.On<CompetitorRegistered>("notifications", (data) =>
+        {
+            ShowAlert($"You have been registered. Your {data.FirstName} {data.LastName} starting numer is: {data.Number}. Congrats!");
+            StateHasChanged();
+        });
+    }
+
+    private void CloseAlert() => showAlert = false;
+
+    private void ShowAlert(string message)
+    {
+        alertMessage = message;
+        showAlert = true;
     }
 }

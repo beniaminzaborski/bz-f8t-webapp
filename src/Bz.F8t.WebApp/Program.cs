@@ -17,5 +17,8 @@ builder.Services
 builder.Services
     .AddRefitClient<IRegistrationApi>()
     .ConfigureHttpClient(c => c.BaseAddress = new Uri(builder.Configuration.GetValue<string>("Services:RegistrationUri")!));
+builder.Services
+    .AddRefitClient<ISignalRApi>()
+    .ConfigureHttpClient(c => c.BaseAddress = new Uri(builder.Configuration.GetValue<string>("Services:SignalRApi")!));
 
 await builder.Build().RunAsync();

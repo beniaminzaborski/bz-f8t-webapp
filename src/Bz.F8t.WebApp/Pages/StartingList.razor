@@ -58,14 +58,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        competitors = new List<CompetitorDto>
-        {
-            new CompetitorDto(Guid.NewGuid(), Id, "1", "Jan", "Kowalski", new DateTime(1980, 01, 23), "Kielce", null),
-            new CompetitorDto(Guid.NewGuid(), Id, "2", "Janusz", "Januszewski", new DateTime(1967, 03, 03), "Kielce", null),
-            new CompetitorDto(Guid.NewGuid(), Id, "3", "Kuliusz", "Grab", new DateTime(1977, 09, 20), "Kielce", null)
-    };
+        // competitors = new List<CompetitorDto>
+        // {
+        //     new CompetitorDto(Guid.NewGuid(), Id, "1", "Jan", "Kowalski", new DateTime(1980, 01, 23), "Kielce", null),
+        //     new CompetitorDto(Guid.NewGuid(), Id, "2", "Janusz", "Januszewski", new DateTime(1967, 03, 03), "Kielce", null),
+        //     new CompetitorDto(Guid.NewGuid(), Id, "3", "Kuliusz", "Grab", new DateTime(1977, 09, 20), "Kielce", null)
+        // };
 
-        //await FetchDataAsync();
+        await FetchDataAsync();
     }
 
     private async Task FetchDataAsync()

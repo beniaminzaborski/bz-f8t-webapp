@@ -1,8 +1,13 @@
 ﻿@page "/registration/{id:guid}"
 @using Bz.F8t.WebApp.Models
+@using Bz.F8t.WebApp.Notifications
+@using Microsoft.AspNetCore.SignalR.Client
+
+@implements IAsyncDisposable
 
 @inject NavigationManager navManager
 @inject IRegistrationApi registrationApi;
+@inject ISignalRApi signalRApi
 
 <PageTitle>Registration</PageTitle>
 
@@ -80,22 +85,50 @@
 
     private CompetitorRegistrationModel Model { get; set; } = new();
 
+    private HubConnection? _notificationHubConnection;
+
     private string alertMessage = string.Empty;
     private bool showAlert = false;
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        return base.OnInitializedAsync();
+        await StartHubConnectionAsync();
+    }
+
+    private async Task StartHubConnectionAsync()
+    {
+        var signalRConnectionInfo = await signalRApi.SignalRNegotiateAsync();
+
+        var signalrUrl = ($"https://sigr-fott-qa-westeu.service.signalr.net");
+        _notificationHubConnection = new HubConnectionBuilder()
+            .WithUrl(signalRConnectionInfo.Url, options =>
+            {
+                options.AccessTokenProvider = () => Task.FromResult(signalRConnectionInfo.AccessToken);
+            })
+            .WithAutomaticReconnect()
+            .Build();
+
+        await _notificationHubConnection.StartAsync();
+    }
+
+    private void SubscribeToNotifications()
+    {
+        _notificationHubConnection?.On<CompetitorRegistered>("notifications", (data) =>
+        {
+            ShowAlert($"You have been registered. Your {data.FirstName} {data.LastName} starting numer is: {data.Number}. Congrats!");
+            StateHasChanged();
+        });
     }
 
     private async Task Submit()
     {
+        SubscribeToNotifications();
         await RegisterAsync();
 
-        if (!showAlert)
-        {
-            navManager.NavigateTo($"registration-summary/{Id}");
-        }
+        // if (!showAlert)
+        // {
+        //     navManager.NavigateTo($"registration-summary/{Id}");
+        // }
     }
 
     private async Task RegisterAsync()
@@ -120,5 +153,10 @@
     {
         alertMessage = message;
         showAlert = true;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _notificationHubConnection?.DisposeAsync();
     }
 }

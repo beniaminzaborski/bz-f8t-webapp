@@ -22,6 +22,8 @@ public class CompetitionModel
 
     public DateTime StartTime { get; set; } = DateTime.UtcNow;
 
+    public IEnumerable<CheckpointModel> Checkpoints { get; set; } = new List<CheckpointModel>();
+
     [Required]
     [Range(0, 1000000)]
     public decimal Distance { get; set; }
@@ -37,7 +39,7 @@ public class CompetitionModel
     public static CompetitionModel FromCompetitionDto(CompetitionDto dto)
     {
         return new CompetitionModel
-        { 
+        {
             Id = dto.Id,
             City = dto.Place.City,
             Latitude = dto.Place.Latitude,
@@ -46,7 +48,8 @@ public class CompetitionModel
             StartTime = dto.StartAt,
             Distance = dto.Distance.Amount,
             DistanceUnit = dto.Distance.Unit,
-            MaxNumberOfCompetitors = dto.MaxCompetitors
+            MaxNumberOfCompetitors = dto.MaxCompetitors,
+            Checkpoints = dto.Checkpoints.Select(c => new CheckpointModel { Id = c.Id, TrackPointAmount = c.TrackPointAmount, TrackPointUnit = c.TrackPointUnit })
         };
     }
 

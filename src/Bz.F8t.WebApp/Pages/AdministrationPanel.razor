@@ -46,6 +46,7 @@
                     <td>
                         <div class="btn-group" role="group" aria-label="Actions">
                             <button type="button" class="btn btn-primary @(IsActionActive("Edit", competition.Status) ? "" : "disabled")" @onclick="@(() => EditCompetition(competition.Id))"><span class="bi bi-pencil-square"></span></button>
+                            <button type="button" class="btn btn-warning @(IsActionActive("EditCheckpoints", competition.Status) ? "" : "disabled")" @onclick="@(() => EditCheckpoints(competition.Id))"><span class="bi bi-clipboard-check"></span></button>
                             <button type="button" class="btn btn-success @(IsActionActive("OpenForRegistration", competition.Status) ? "" : "disabled")" @onclick="@(() => OpenForRegistrationAsync(competition.Id))"><span class="bi bi-skip-start-circle"></span></button>
                             <button type="button" class="btn btn-danger @(IsActionActive("CompleteRegistration", competition.Status) ? "" : "disabled")" @onclick="@(() => CompleteRegistrationAsync(competition.Id))"><span class="bi bi-stop-circle"></span></button>
                         </div>
@@ -63,16 +64,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // competitions = new List<CompetitionDto>
-        // {
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2023, 12, 06, 08, 30, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Kraków", 0, 0), 4750, "Closed", Array.Empty<CheckpointDto>()),
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 01, 08, 30, 00), new DistanceDto(10, "Kilometers"), new CompetitionPlaceDto("Kielce", 0, 0), 1500, "RegistrationCompleted", Array.Empty<CheckpointDto>()),
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 02, 11, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Warszawa", 0, 0), 8000, "OpenedForRegistration", Array.Empty<CheckpointDto>()),
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 09, 00, 00), new DistanceDto(42, "Kilometers"), new CompetitionPlaceDto("Poznań", 0, 0), 1500, "OpenedForRegistration", Array.Empty<CheckpointDto>()),
-        //     new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 10, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Łódź", 0, 0), 1500, "Draft", Array.Empty<CheckpointDto>())
-        // };
+        competitions = new List<CompetitionDto>
+        {
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2023, 12, 06, 08, 30, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Kraków", 0, 0), 4750, "Closed", Array.Empty<CheckpointDto>()),
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 01, 08, 30, 00), new DistanceDto(10, "Kilometers"), new CompetitionPlaceDto("Kielce", 0, 0), 1500, "RegistrationCompleted", Array.Empty<CheckpointDto>()),
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 01, 02, 11, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Warszawa", 0, 0), 8000, "OpenedForRegistration", Array.Empty<CheckpointDto>()),
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 09, 00, 00), new DistanceDto(42, "Kilometers"), new CompetitionPlaceDto("Poznań", 0, 0), 1500, "OpenedForRegistration", Array.Empty<CheckpointDto>()),
+            new CompetitionDto(Guid.NewGuid(), new DateTime(2024, 02, 10, 10, 00, 00), new DistanceDto(21, "Kilometers"), new CompetitionPlaceDto("Łódź", 0, 0), 1500, "Draft", new CheckpointDto[] { new CheckpointDto(Guid.NewGuid(), 0, "Kilometers"), new CheckpointDto(Guid.NewGuid(), 7, "Kilometers"), new CheckpointDto(Guid.NewGuid(), 21, "Kilometers") })
+        };
 
-        await FetchDataAsync();
+        //await FetchDataAsync();
     }
 
     private async Task FetchDataAsync()
@@ -104,6 +105,11 @@
     private void EditCompetition(Guid competitionId)
     {
         navManager.NavigateTo($"administration-panel/competition/{competitionId}");
+    }
+
+    private void EditCheckpoints(Guid competitionId)
+    {
+        navManager.NavigateTo($"administration-panel/competition/{competitionId}/checkpoints");
     }
 
     private async Task OpenForRegistrationAsync(Guid competitionId)
@@ -142,6 +148,7 @@
         actionName switch
         {
             "Edit" => status != "Closed" && status != "RegistrationCompleted",
+            "EditCheckpoints" => status != "Closed" && status != "RegistrationCompleted",
             "OpenForRegistration" => status == "Draft",
             "CompleteRegistration" => status == "OpenedForRegistration"
         };

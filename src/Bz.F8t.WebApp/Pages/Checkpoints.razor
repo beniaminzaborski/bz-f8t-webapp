@@ -1,0 +1,110 @@
+﻿@page "/administration-panel/competition/{id:guid?}/checkpoints"
+
+@using Bz.F8t.WebApp.ApiClients.Dtos
+@using Bz.F8t.WebApp.Models
+
+@inject NavigationManager navManager
+@inject ICompetitionApi competitionApi;
+
+<h3>Competition checkpoints</h3>
+
+<div class="alert alert-danger alert-dismissible fade @(showAlert ? "show" : "")" role="alert">
+    @alertMessage
+    <button type="button" class="btn-close" @onclick="CloseAlert" aria-label="Close"></button>
+</div>
+
+<div class="btn-group" role="group" aria-label="Toolbar">
+    <button type="button" class="btn btn-primary" @onclick="CreateCheckpoint">
+        <i class="bi bi-plus-circle align-middle"></i>
+        <span class="align-middle">Create checkpoint</span>
+    </button>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped table-hover caption-top align-middle">
+        <caption>List of checkpoints</caption>
+        <thead class="table-dark">
+            <tr>
+                <th scope="col">Track point amount</th>
+                <th scope="col">Track point unit</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var checkpoint in Model.Checkpoints)
+            {
+                <tr>
+                    <td>@checkpoint.TrackPointAmount</td>
+                    <td>@checkpoint.TrackPointUnit</td>
+                    <td>
+                        <div class="btn-group" role="group" aria-label="Actions">
+                            <button type="button" class="btn btn-primary" @onclick="@(() => RemoveCheckpoint(checkpoint.Id))"><span class="bi bi-pencil-square"></span></button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private CompetitionModel Model { get; set; } = new();
+    private bool isUpdateMode = false;
+    private string alertMessage = string.Empty;
+    private bool showAlert = false;
+
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            isUpdateMode = true;
+            await FetchDataAsync();
+        }
+        else
+        {
+            Model = new();
+        }
+    }
+
+    private async Task FetchDataAsync()
+    {
+        try
+        {
+            var response = await competitionApi.GetCompetitionAsync(Id!.Value);
+            if (response.IsSuccessStatusCode)
+            {
+                var competitionDto = response.Content;
+                Model = CompetitionModel.FromCompetitionDto(competitionDto);
+            }
+            else
+            {
+                ShowAlert(response.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+    }
+
+    private void CreateCheckpoint()
+    {    
+    
+    }
+
+    private void RemoveCheckpoint(Guid checkpointId)
+    {
+        
+    }
+
+
+    private void CloseAlert() => showAlert = false;
+
+    private void ShowAlert(string message)
+    {
+        alertMessage = message;
+        showAlert = true;
+    }
+}

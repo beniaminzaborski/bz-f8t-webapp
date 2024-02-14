@@ -1,0 +1,48 @@
+name: Build and deploy static web app
+
+on:
+  workflow_dispatch: {}
+  push: {}
+
+env:
+  AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  AZURE_BLOB_STORAGE_ACCOUNT_NAME: ${{ vars.AZURE_BLOB_STORAGE_ACCOUNT_NAME }}
+  AZURE_WEBAPP_PACKAGE_PATH: publish
+  CONFIGURATION: Release
+  DOTNET_CORE_VERSION: 8.0.x
+  WORKING_DIRECTORY: .
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+
+    - name: Restore
+      run: dotnet restore "${{ env.WORKING_DIRECTORY }}/Bz.F8t.WebApp.sln"
+
+    - name: Build
+      run: dotnet build "${{ env.WORKING_DIRECTORY }}/Bz.F8t.WebApp.sln" --configuration ${{ env.CONFIGURATION }} --no-restore
+
+    - name: Publish
+      run: dotnet publish "${{ env.WORKING_DIRECTORY }}/src/Bz.F8t.WebApp/" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+
+    - name: Authenticate with Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ env.AZURE_CREDENTIALS }}
+
+    #Deploy to storage using CLI
+    - name: Deploy to Azure Storage Account
+      uses: azure/CLI@v1
+      with:
+        azcliversion: latest
+        inlineScript: | 
+          # show azure account being used
+          az account show
+          # az storage account upload
+          az storage blob upload-batch --account-name ${{ env.AZURE_BLOB_STORAGE_ACCOUNT_NAME }} -s ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/wwwroot -d \$web
